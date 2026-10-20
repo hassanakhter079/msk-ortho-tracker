@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSK & Orthopedics Master Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bone:       #F5F0E8;
+            --bone-mid:   #EBE4D4;
+            --bone-dark:  #D6CBAF;
+            --ink:        #1A1714;
+            --ink-mid:    #3D3730;
+            --ink-light:  #7A6F63;
+            --accent:     #B54A1F;
+            --accent-dim: #8C3917;
+            --accent-bg:  #FAF0EB;
+            --green:      #2D7D4F;
+            --green-bg:   #EBF7F1;
+            --yellow:     #C98A00;
+            --border:     #D9D0C0;
+            --card:       #FFFFFF;
+            --shadow:     0 1px 3px rgba(26,23,20,0.08), 0 4px 12px rgba(26,23,20,0.04);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bone);
+            color: var(--ink);
+            line-height: 1.55;
+            padding: 24px 16px 60px;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            max-width: 900px;
+            margin: 0 auto 28px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-bg);
+            border: 1px solid #E8C4B4;
+            border-radius: 4px;
+            padding: 3px 9px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--ink);
+            letter-spacing: -0.02em;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--ink-light);
+            margin-top: 6px;
+        }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .stat-num.accent { color: var(--accent); }
+        .stat-num.green  { color: var(--green); }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--ink-light);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── PROGRESS BAR ── */
+        .progress-wrap {
+            background: var(--bone-mid);
+            border-radius: 6px;
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, #E06030 100%);
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 6px;
+        }
+
+        /* ── CONTROLS ── */
+        .controls-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--card);
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(181,74,31,0.12);
+        }
+
+        .search-input::placeholder { color: var(--ink-light); }
+
+        .filter-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            padding: 7px 13px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--ink-light);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--ink);
+            color: var(--bone);
+            border-color: var(--ink);
+        }
+
+        .btn-reset {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            padding: 7px 13px;
+            border-radius: 6px;
+            border: 1px solid #E8C4B4;
+            background: var(--accent-bg);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-reset:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* ── WARNING ── */
+        .warning-banner {
+            display: none;
+            background: #FFFBEB;
+            border: 1px solid #F6C444;
+            color: #92600A;
+            padding: 10px 14px;
+            border-radius: 7px;
+            font-size: 0.83rem;
+            margin-top: 12px;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── CATEGORY CARD ── */
+        .category-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .cat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bone-mid);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cat-icon {
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .cat-title-wrap { flex: 1; }
+
+        .cat-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .cat-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.3;
+        }
+
+        .cat-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat-count {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--ink-light);
+            white-space: nowrap;
+        }
+
+        .cat-mini-bar {
+            width: 60px;
+            height: 5px;
+            background: var(--bone-dark);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .cat-mini-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .cat-chevron {
+            font-size: 0.85rem;
+            color: var(--ink-light);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .cat-header.collapsed .cat-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .topic-list {
+            list-style: none;
+        }
+
+        .topic-list.collapsed {
+            display: none;
+        }
+
+        /* ── TOPIC ITEM ── */
+        .topic-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 11px 20px;
+            border-bottom: 1px solid var(--bone);
+            transition: background-color 0.15s;
+        }
+
+        .topic-item:last-child { border-bottom: none; }
+        .topic-item:hover { background-color: var(--bone); }
+
+        .topic-item.completed {
+            background-color: var(--green-bg);
+        }
+
+        .topic-item.completed .topic-name {
+            text-decoration: line-through;
+            color: var(--ink-light);
+        }
+
+        .topic-item.hidden { display: none; }
+
+        /* Custom checkbox */
+        .topic-checkbox {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .topic-checkbox:checked {
+            background: var(--green);
+            border-color: var(--green);
+        }
+
+        .topic-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 0px;
+            width: 8px;
+            height: 12px;
+            border: 2px solid white;
+            border-top: none;
+            border-left: none;
+            transform: rotate(45deg) scaleY(0.85);
+        }
+
+        .topic-checkbox:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .topic-details { flex: 1; min-width: 0; }
+
+        .topic-name {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--ink);
+            cursor: pointer;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        .tag-fa   { background: #EDE9FE; color: #5B21B6; }
+        .tag-ck   { background: #DBEAFE; color: #1D4ED8; }
+        .tag-high { background: #FEE2E2; color: #B91C1C; }
+        .tag-clin { background: #D1FAE5; color: #065F46; }
+
+        .topic-desc {
+            font-size: 0.8rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+
+        /* No results */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            .cat-header { padding: 12px 14px; }
+            .topic-item { padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-top">
+        <div>
+            <span class="badge">FCPS · USMLE · Clinical</span>
+            <h1>MSK & <span>Orthopaedics</span><br>Master Tracker</h1>
+            <p class="subtitle">First Aid Step 1 · USMLE Step 2 CK · Clinical Orthopaedics</p>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-num accent" id="stat-pct">0%</div>
+            <div class="stat-label">Complete</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num green" id="stat-done">0</div>
+            <div class="stat-label">Done</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-left">—</div>
+            <div class="stat-label">Remaining</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-total">—</div>
+            <div class="stat-label">Total Topics</div>
+        </div>
+    </div>
+
+    <div class="progress-wrap">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="controls-bar">
+        <input type="text" id="search-box" class="search-input" placeholder="Search topics, conditions, drugs…">
+        <div class="filter-btns">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="done">Done</button>
+        </div>
+        <button class="btn-reset" id="reset-btn">Reset</button>
+    </div>
+
+    <div id="warning-banner" class="warning-banner">
+        <strong>Note:</strong> Storage restricted in this environment — progress won't persist on refresh.
+    </div>
+</div>
+
+<div class="container" id="tracker-content">
+    <!-- Populated by JS -->
+</div>
+
+<p class="no-results" id="no-results">No topics match your search.</p>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const categories = [
+  {
+    icon: "🦴",
+    title: "Anatomy, Embryology & Physiology",
+    topics: [
+      { name: "Bone Formation & Cellular Biology", tags:["fa","high"], desc:"Endochondral vs. membranous ossification. Osteoblasts (RUNX2), osteoclasts (RANK-L/OPG axis), osteocytes as mechanosensors. Woven vs. lamellar bone." },
+      { name: "Skeletal Muscle Contraction", tags:["fa"], desc:"Sarcomere structure (I-band, H-zone, A-band). Ca²⁺ → troponin C → tropomyosin shift → cross-bridge cycling. ATP role in active and rigor states." },
+      { name: "Bone Remodelling & Calcium Homeostasis", tags:["fa"], desc:"PTH, Vitamin D (1,25-OH₂D₃), and calcitonin interactions. Coupling factor: osteoblast-to-osteoclast signalling via RANKL/OPG." },
+      { name: "Brachial Plexus — Roots to Branches", tags:["fa","high"], desc:"Roots C5–T1. Trunks, divisions, cords, terminal branches. Origin of musculocutaneous, axillary, radial, median, ulnar nerves." },
+      { name: "Upper Limb Nerve Injury Patterns", tags:["fa","high"], desc:"Erb palsy (C5-C6, waiter's tip), Klumpke (C8-T1, claw). Axillary (surgical neck fracture), radial (mid-shaft humerus, wrist drop), median (carpal tunnel, ape hand), ulnar (medial epicondyle, ulnar claw)." },
+      { name: "Lower Limb Nerve Injuries & Gait", tags:["fa","high"], desc:"Femoral (cannot extend knee), obturator (hip adduction loss), sciatic, common fibular (foot drop/steppage gait), tibial. Superior gluteal → Trendelenburg gait." },
+      { name: "Rotator Cuff Muscles (SITS)", tags:["fa"], desc:"Supraspinatus (initiation of abduction), Infraspinatus & Teres minor (external rotation), Subscapularis (internal rotation). Supraspinatus most commonly torn." },
+      { name: "Intervertebral Disc & Dermatome Map", tags:["fa"], desc:"Nucleus pulposus herniates posterolaterally. L4 (medial foot, knee reflex), L5 (dorsal foot, no reflex change), S1 (lateral foot, Achilles reflex). C6 biceps reflex, C7 triceps reflex." },
+      { name: "Joint Types & Synovial Anatomy", tags:["fa"], desc:"Fibrous, cartilaginous (synchondrosis, symphysis), synovial. Synovial fluid: type A (macrophage-like) and type B (fibroblast-like) synoviocytes." },
+    ]
+  },
+  {
+    icon: "🧬",
+    title: "Inherited & Metabolic Bone Diseases",
+    topics: [
+      { name: "Achondroplasia", tags:["fa","high"], desc:"FGFR3 gain-of-function mutation (autosomal dominant). Inhibits endochondral ossification. Rhizomelic shortening, macrocephaly, normal intelligence. Spinal stenosis risk." },
+      { name: "Osteogenesis Imperfecta (OI)", tags:["fa","high"], desc:"Type I collagen defect (COL1A1/COL1A2). Blue sclerae, hearing loss, dental abnormalities, multiple fractures. Type II lethal in utero. Bisphosphonates used in management." },
+      { name: "Osteopetrosis (Marble Bone Disease)", tags:["fa"], desc:"Carbonic anhydrase II mutation → osteoclast dysfunction → dense brittle bone. Pancytopenia (marrow obliteration). Cranial nerve palsies from foraminal narrowing." },
+      { name: "Marfan Syndrome", tags:["fa"], desc:"FBN1 (fibrillin-1) mutation → TGF-β dysregulation. Tall, arachnodactyly, lens subluxation (upward), aortic root dilatation. AR: homocystinuria (lens subluxation downward, thrombosis)." },
+      { name: "Ehlers-Danlos Syndrome", tags:["fa"], desc:"Defective collagen crosslinking. Hypermobile joints, skin hyperextensibility, easy bruising. Type IV (vascular EDS): COL3A1 — risk of arterial rupture." },
+      { name: "Osteoporosis", tags:["fa","high","ck"], desc:"T-score ≤ −2.5 (DEXA). Loss of trabecular bone. Risk factors: post-menopausal oestrogen loss, steroid use, smoking, immobility. Vertebral wedge fractures, hip (subcapital), Colles fracture." },
+      { name: "Osteomalacia & Rickets", tags:["fa","high"], desc:"Defective bone mineralisation: normal osteoid, reduced mineral. Adults: Looser zones (pseudofractures) on X-ray. Children: craniotabes, rachitic rosary, bowing of legs. ↓ Ca/PO₄, ↑ ALP." },
+      { name: "Paget Disease of Bone", tags:["fa","high"], desc:"Disorganised remodelling: lytic → mixed → sclerotic. ↑ ALP (markedly), normal Ca/PO₄/PTH. Enlarged skull (hat size), hearing loss, tibial bowing. Complications: high-output cardiac failure, osteosarcoma (<1%)." },
+      { name: "Hyperparathyroidism & Osteitis Fibrosa Cystica", tags:["fa"], desc:"Primary: PTH-adenoma → ↑ Ca, ↓ PO₄. Bone resorption → brown tumours, subperiosteal erosion radial border of middle phalanges, 'salt-and-pepper' skull." },
+      { name: "Fluorosis & Skeletal Fluorosis", tags:["clin"], desc:"Endemic in certain regions of Pakistan. Dense irregular trabeculation, calcification of tendons/ligaments, increased bone density. Mottling of teeth (dental fluorosis)." },
+    ]
+  },
+  {
+    icon: "🦠",
+    title: "Bone & Joint Infections",
+    topics: [
+      { name: "Acute Haematogenous Osteomyelitis", tags:["ck","high","clin"], desc:"Most common: S. aureus (all ages). Salmonella in sickle cell. Pseudomonas in IV drug users and nail punctures. Children: metaphysis (rich vasculature, sluggish flow). Signs: fever, localised tenderness, elevated ESR/CRP/WBC." },
+      { name: "Chronic Osteomyelitis", tags:["ck","clin"], desc:"Sequestrum (devitalised bone) + involucrum (periosteal new bone). Brodie abscess (localised subacute, pus without systemic upset). S. aureus predominant. Long-term antibiotics ± surgery." },
+      { name: "Septic Arthritis", tags:["ck","high","clin"], desc:"Kocher criteria (fever, non-weight-bearing, ↑ ESR >40, WBC >12,000). ≥3 criteria → high probability septic arthritis vs. transient synovitis. Aspirate, Gram stain, culture. Emergency washout. N. gonorrhoea in sexually active adults." },
+      { name: "Spinal Tuberculosis (Pott's Disease)", tags:["ck","high","clin"], desc:"Common in Pakistan. Anterior vertebral body destruction → kyphosis (gibbus deformity). Paradiscal spread. Cold (psoas) abscess. MRI gold standard. Quadriplegia risk. Anti-TB therapy ± surgery." },
+      { name: "Reactive Arthritis", tags:["fa","ck"], desc:"Post-infectious (Chlamydia, Salmonella, Shigella, Yersinia, Campylobacter). HLA-B27. Triad: urethritis, conjunctivitis, arthritis — 'can't see, can't pee, can't climb a tree'." },
+      { name: "Septic Bursitis", tags:["ck","clin"], desc:"Prepatellar and olecranon most common. S. aureus. Fluctuant swelling, warmth, tenderness directly over bursa. Aspiration and antibiotics; surgical drainage if no improvement." },
+    ]
+  },
+  {
+    icon: "🔬",
+    title: "Bone Tumours",
+    topics: [
+      { name: "Osteochondroma (Exostosis)", tags:["fa","clin"], desc:"Most common benign bone tumour. Bony projection capped by cartilage, pointing away from epiphysis. Usually metaphyseal. Risk of sarcomatous change <1%. Multiple hereditary exostoses (EXT1/EXT2)." },
+      { name: "Osteoid Osteoma", tags:["fa","high","clin"], desc:"< 2 cm. Night pain relieved by aspirin/NSAIDs (prostaglandin-mediated). Nidus on CT (sclerotic rim surrounding lucent core). Spine: scoliosis. Radiofrequency ablation is definitive." },
+      { name: "Osteoblastoma", tags:["fa"], desc:"> 2 cm. Spine (posterior elements) most common site. Pain not relieved by NSAIDs (unlike osteoid osteoma). More locally aggressive. Surgical curettage." },
+      { name: "Giant Cell Tumour (GCT)", tags:["fa","high","clin"], desc:"Osteoclast-rich lesion. Epiphysis (after growth plate closure), distal femur/proximal tibia/distal radius. 'Soap bubble' lytic lesion reaching articular surface. Locally aggressive, occasionally metastasises. Denosumab (anti-RANKL)." },
+      { name: "Enchondroma", tags:["fa"], desc:"Intramedullary cartilage tumour. Small bones of the hand. Multiple enchondromas: Ollier disease (↑ malignant risk), Maffucci syndrome (+ haemangiomas)." },
+      { name: "Aneurysmal Bone Cyst (ABC)", tags:["clin"], desc:"Blood-filled multiloculated cyst. Metaphysis. Expansile 'soap bubble' lytic lesion. Secondary ABC can arise in GCT or other tumours. USP6 gene rearrangements (primary)." },
+      { name: "Simple (Unicameral) Bone Cyst", tags:["clin"], desc:"Central metaphyseal lytic lesion. Proximal humerus > proximal femur. 'Fallen fragment' sign on pathological fracture. Steroid injection or surgery." },
+      { name: "Osteosarcoma", tags:["fa","high","clin"], desc:"Most common primary malignant bone tumour (after myeloma). Peak: adolescents (distal femur/proximal tibia). Rb & TP53 mutations. Sunburst pattern + Codman triangle. Chemotherapy + limb salvage. Parosteal variant: slow-growing, better prognosis." },
+      { name: "Ewing Sarcoma", tags:["fa","high"], desc:"t(11;22) — EWSR1-FLI1 fusion. Diaphysis flat bones, pelvis. 'Onion skinning' periosteal reaction. Aggressive, lung metastases. Peak: 10–20 years. Chemotherapy + surgery/radiation." },
+      { name: "Chondrosarcoma", tags:["fa","clin"], desc:"Adults > 40 years. Pelvis, proximal femur, humerus. Rings and arcs of calcification. Mostly resistant to chemo/radiotherapy; surgery is mainstay. Grade determines prognosis." },
+      { name: "Metastatic Bone Disease", tags:["ck","high","clin"], desc:"Most common malignant bone tumour overall. Breast, lung, prostate, kidney, thyroid. Prostate → sclerotic. Breast/lung/kidney/thyroid → lytic. Treatment: bisphosphonates/denosumab, radiation, surgery for pathological fractures." },
+      { name: "Multiple Myeloma — Bone Manifestations", tags:["fa","ck"], desc:"Punched-out lytic lesions, osteoporosis, hypercalcaemia, pathological fractures. Serum protein electrophoresis (M-spike). BJP in urine. No uptake on bone scan (no osteoblastic activity)." },
+    ]
+  },
+  {
+    icon: "🩻",
+    title: "Arthritis & Rheumatologic Conditions",
+    topics: [
+      { name: "Osteoarthritis (OA)", tags:["fa","ck","high","clin"], desc:"Wear and tear. DIP (Heberden nodes) and PIP (Bouchard nodes). Subchondral sclerosis, osteophytes, joint space narrowing, subchondral cysts. Treatment: weight loss, physio, NSAIDs, intra-articular steroids, arthroplasty." },
+      { name: "Rheumatoid Arthritis (RA)", tags:["fa","ck","high"], desc:"MCP + PIP symmetric synovitis. Morning stiffness >1 hr. RF and anti-CCP antibodies. Pannus formation → cartilage erosion. Systemic: nodules, pleural effusion, pericarditis, Felty syndrome. DMARDs: methotrexate first-line." },
+      { name: "Gout", tags:["fa","ck","high","clin"], desc:"Monosodium urate crystals — needle-shaped, negatively birefringent (yellow when parallel). 1st MTP (podagra). Acute: colchicine or NSAIDs. Chronic: allopurinol/febuxostat. Tophi, urate nephropathy." },
+      { name: "Pseudogout (CPPD)", tags:["fa","ck"], desc:"Calcium pyrophosphate dihydrate — rhomboid-shaped, weakly positively birefringent (blue when parallel). Knee most common. Chondrocalcinosis on X-ray. Managed like acute gout (NSAIDs/colchicine)." },
+      { name: "Ankylosing Spondylitis", tags:["fa","ck","high"], desc:"HLA-B27. Young men. Sacroiliitis → bamboo spine (syndesmophytes). Uveitis, aortic regurgitation, apical pulmonary fibrosis. ↑ ESR, normal RF. TNF inhibitors or NSAIDs." },
+      { name: "Psoriatic Arthritis", tags:["fa","ck"], desc:"DIP involvement, 'pencil in cup' deformity, dactylitis (sausage digit), enthesitis, nail pitting. HLA-B27. Can be seronegative. Biologics (TNF-i, IL-17-i) for severe disease." },
+      { name: "Reactive Arthritis (Reiter Syndrome)", tags:["fa","ck"], desc:"Post-GI/GU infection. HLA-B27. Asymmetric oligoarthritis + urethritis + conjunctivitis. Keratoderma blennorrhagica, circinate balanitis. Self-limiting." },
+      { name: "SLE — Musculoskeletal Manifestations", tags:["fa","ck"], desc:"Non-erosive arthritis/arthralgia. Avascular necrosis (steroid-induced). ANA + anti-dsDNA + anti-Smith. Libman-Sacks endocarditis. Hydroxychloroquine base of treatment." },
+      { name: "Sjögren Syndrome", tags:["fa","ck"], desc:"Anti-SSA (Ro) and anti-SSB (La). Keratoconjunctivitis sicca (dry eyes), xerostomia (dry mouth). Parotid enlargement. Peripheral neuropathy, non-Hodgkin lymphoma risk." },
+      { name: "Systemic Sclerosis (Scleroderma)", tags:["fa","ck"], desc:"Diffuse: anti-Scl-70 (topoisomerase I), anti-RNA pol III. Limited (CREST): anti-centromere antibody. CREST = Calcinosis, Raynaud, Oesophageal dysmotility, Sclerodactyly, Telangiectasia." },
+      { name: "Polymyositis & Dermatomyositis", tags:["fa","ck"], desc:"Proximal muscle weakness, ↑ CK, anti-Jo-1. Dermatomyositis: heliotrope rash, Gottron papules, shawl sign, V-sign. Paraneoplastic association (especially DM). Lung disease: ILD." },
+      { name: "Polymyalgia Rheumatica (PMR)", tags:["fa","ck","high"], desc:"Age >50. Shoulder + pelvic girdle stiffness, morning onset. ↑ ESR/CRP, normal CK. 15–20% have Giant Cell (Temporal) Arteritis. Dramatic response to low-dose prednisolone." },
+      { name: "Fibromyalgia", tags:["ck"], desc:"Chronic widespread pain, fatigue, sleep disturbance, cognitive symptoms. Normal labs and inflammatory markers. Tender points. Treatment: duloxetine, pregabalin, low-dose TCA, aerobic exercise." },
+      { name: "Juvenile Idiopathic Arthritis (JIA)", tags:["ck"], desc:"Systemic (Still disease: quotidian fever, salmon-coloured rash, hepatosplenomegaly), oligoarticular (ANA+, uveitis risk), polyarticular (RF+ or RF−), enthesitis-related." },
+    ]
+  },
+  {
+    icon: "👶",
+    title: "Paediatric Orthopaedics",
+    topics: [
+      { name: "Developmental Dysplasia of the Hip (DDH)", tags:["ck","high","clin"], desc:"Risk: first-born female, breech, positive family history. Barlow (dislocates) and Ortolani (reduces) manoeuvres. Ultrasound <4 months, X-ray after. Pavlik harness <6 months, closed reduction 6–18 months, open reduction if late." },
+      { name: "Legg-Calvé-Perthes Disease", tags:["ck","high","clin"], desc:"Idiopathic AVN femoral head, ages 4–10, boys. Antalgic gait, restricted abduction/internal rotation. X-ray stages: synovitis → flattening/fragmentation → re-ossification → remodelling. Containment principle." },
+      { name: "Slipped Capital Femoral Epiphysis (SCFE)", tags:["ck","high","clin"], desc:"Obese adolescents 10–16 years. Posteroinferior slip of epiphysis on metaphysis. 'Ice cream off cone'. Bilateral in 25%. Pain in groin/knee. Frog-leg lateral X-ray. Surgical pinning in situ is standard — urgent (AVN risk if acute on chronic)." },
+      { name: "Transient Synovitis of Hip", tags:["ck","clin"], desc:"Most common cause of acute hip pain in children 3–10 years. Post-viral. Self-limiting, 1–4 weeks. Kocher criteria differentiate from septic arthritis. Aspiration if doubt." },
+      { name: "Nursemaid's Elbow (Radial Head Subluxation)", tags:["ck","clin"], desc:"Longitudinal traction on arm of young child. Annular ligament slip. Child holds arm extended and pronated, refuses to use it. Reduction: hyperpronation (preferred) or supination + flexion. No imaging needed if classic." },
+      { name: "Osgood-Schlatter Disease", tags:["ck","clin"], desc:"Traction apophysitis of tibial tubercle. Active adolescent boys during growth spurt. Localised pain and swelling over tibial tubercle, worse with activity. Self-limiting; RICE, physio." },
+      { name: "Clubfoot (Congenital Talipes Equinovarus)", tags:["clin"], desc:"CAVE: Cavus, Adductus, Varus, Equinus. 1:1000 births. Bilateral in 50%. Ponseti method (serial casting + percutaneous Achilles tenotomy) is gold standard." },
+      { name: "Scoliosis", tags:["ck","clin"], desc:"Lateral curvature >10° with rotation. Adolescent idiopathic (most common), congenital, neuromuscular. Adam's forward bend test. Cobb angle on X-ray. Bracing if 25–45°, surgery if >45°." },
+      { name: "Genu Varum & Genu Valgum", tags:["clin"], desc:"Physiological: varum (birth–2 yrs), valgum (2–6 yrs). Pathological varum: Blount disease (asymmetric, tibia vara) and rickets. Evaluate with tibio-femoral angle and DEXA if metabolic suspected." },
+      { name: "Congenital Vertical Talus (Rocker-Bottom Foot)", tags:["clin"], desc:"Rigid flatfoot with convex plantar surface. Talus in fixed equinus. Often associated with syndromes (trisomy 18, arthrogryposis). Serial casting then surgical correction." },
+    ]
+  },
+  {
+    icon: "🏥",
+    title: "Orthopaedic Trauma",
+    topics: [
+      { name: "Compartment Syndrome", tags:["ck","high","clin"], desc:"Unyielding fascial envelope + ↑ pressure = ischaemia. 6 Ps: Pain (out of proportion, with passive stretch), Paresthesia, Pressure, Pallor, Paralysis, Pulselessness. Measure compartment pressure >30 mmHg or within 30 mmHg of diastolic. Emergency fasciotomy." },
+      { name: "Femoral Neck Fracture", tags:["ck","high","clin"], desc:"Garden classification I–IV. Risk: AVN (medial femoral circumflex artery). Young patients: ORIF urgently. Elderly: hemiarthroplasty (displaced) or DHS (undisplaced). DVT prophylaxis essential." },
+      { name: "Intertrochanteric Fracture", tags:["ck","clin"], desc:"Extracapsular, good blood supply → low AVN risk. DHS (dynamic hip screw) is standard. IMHS (intramedullary) for reverse oblique or subtrochanteric extension." },
+      { name: "Distal Radius Fractures", tags:["ck","clin"], desc:"Colles fracture: dorsal angulation/displacement (dinner fork deformity), FOOSH mechanism. Smith fracture: volar angulation (reversed Colles). Barton fracture: intra-articular rim fracture. CAST vs. ORIF based on stability." },
+      { name: "Scaphoid Fracture", tags:["ck","high","clin"], desc:"Most common carpal bone fracture. FOOSH, anatomical snuffbox tenderness. X-ray often normal initially — MRI/CT for diagnosis. Waist fractures: AVN of proximal pole. Non-displaced: cast 6–12 weeks. Displaced: ORIF (headless compression screw)." },
+      { name: "Clavicle Fractures", tags:["ck","clin"], desc:"Middle third 80%. Group I (middle third): conservative (broad arm sling) unless displaced >2 cm or Z-deformity → ORIF. Medial and lateral thirds less common, higher complication rates." },
+      { name: "Ankle Fractures — Ottawa Rules", tags:["ck","high","clin"], desc:"Ottawa Ankle Rules: bone tenderness at posterior tip malleolus or inability to weight-bear → X-ray. Weber classification: A (below syndesmosis), B (at syndesmosis), C (above syndesmosis → syndesmotic injury). SER injury mechanism most common." },
+      { name: "Calcaneal Fractures", tags:["ck","clin"], desc:"Axial load (fall from height). Bohler's angle ↓ (<20°). Subtalar joint involvement. Sanders classification (CT). Conservative vs. ORIF debated. Associated with vertebral fracture (10%)." },
+      { name: "Anterior Shoulder Dislocation", tags:["ck","high","clin"], desc:"95% of shoulder dislocations. Arm: abducted, externally rotated. Axillary nerve injury (deltoid weakness, regimental patch numbness). Hill-Sachs (posterior humeral head) and Bankart (anterior glenoid labrum) lesions. Reduce: Stimson, Milch, or Cunningham technique." },
+      { name: "Posterior Shoulder Dislocation", tags:["ck","high"], desc:"Seizure/electrocution. Arm: adducted, internally rotated. Missed commonly. Light-bulb sign on AP. Reverse Hill-Sachs (McLaughlin lesion). Reduce under sedation." },
+      { name: "Hip Dislocation", tags:["ck","high","clin"], desc:"Posterior 90% (dashboard injury). Sciatic nerve injury risk. Leg: shortened, adducted, internally rotated. Emergency reduction (AVN risk with delay). Thompson-Epstein classification." },
+      { name: "Fat Embolism Syndrome", tags:["ck","high"], desc:"After long bone (especially femur) or pelvic fractures. 12–72 hr latency. Triad: hypoxaemia (ARDS), neurological dysfunction, petechial rash (axilla, conjunctiva). Supportive treatment; early fixation of fractures reduces risk." },
+      { name: "Supracondylar Fracture of Humerus", tags:["ck","clin"], desc:"Most common elbow fracture in children. Extension type (Gartland I–III): anterior interosseous nerve (AIN) palsy, brachial artery injury. ORIF with crossed K-wires. Cubitus varus (gunstock deformity) late complication." },
+      { name: "Monteggia & Galeazzi Fractures", tags:["ck","clin"], desc:"Monteggia: proximal ulna fracture + radial head dislocation (MUGR). Galeazzi: distal radius fracture + distal radioulnar joint dislocation (GRUD). Both require ORIF." },
+      { name: "Pathological Fractures", tags:["ck","clin"], desc:"Fracture through abnormal bone. Causes: metastases (most common in adults), myeloma, osteoporosis, Paget, primary bone tumour, osteomyelitis. Biopsy before fixation if aetiology unknown." },
+    ]
+  },
+  {
+    icon: "🧠",
+    title: "Spine & Spinal Cord",
+    topics: [
+      { name: "Lumbar Disc Herniation", tags:["ck","high","clin"], desc:"L4-L5 (L5 root: foot dorsiflexion, first web space sensation) and L5-S1 (S1 root: plantarflexion, Achilles reflex loss) most common. Straight leg raise test (Lasègue sign). Conservative 6 weeks; microdiscectomy if fail." },
+      { name: "Cervical Disc Disease & Radiculopathy", tags:["ck","clin"], desc:"C6 root (C5-C6 disc): biceps, brachioradialis reflex, lateral forearm/thumb. C7 root (C6-C7 disc): triceps reflex, middle finger. Spurling test. Conservative vs. ACDF." },
+      { name: "Spinal Stenosis", tags:["ck","high","clin"], desc:"Neurogenic claudication: bilateral leg pain, worse walking, relieved by sitting/flexion (shopping cart sign). L4-L5 most common. MRI confirms canal narrowing. Decompressive laminectomy." },
+      { name: "Cauda Equina Syndrome", tags:["ck","high","clin"], desc:"Saddle anaesthesia, bilateral leg weakness/pain, bladder retention (overflow incontinence), faecal incontinence. LMN signs. SURGICAL EMERGENCY — MRI and decompression within hours." },
+      { name: "Cervical Myelopathy", tags:["ck","clin"], desc:"UMN signs (hyperreflexia, Babinski, clonus, spastic gait, Lhermitte sign). Often insidious onset. MRI: cord compression and signal change. Surgical decompression (ACDF or posterior laminoplasty)." },
+      { name: "Pott's Disease (Spinal TB)", tags:["ck","high","clin"], desc:"L1-L2 most common. Anterior column destruction → kyphosis. Paradiscal involvement on MRI. Psoas/paraspinal cold abscess. Paraplegia risk. 9-month ATT + surgical debridement if neurological compromise." },
+      { name: "Spinal Epidural Abscess", tags:["ck","high"], desc:"Back pain → fever → radiculopathy → myelopathy progression. S. aureus most common. Risk: IVDU, immunocompromise, recent spinal procedure. MRI with contrast. Emergency surgical drainage + antibiotics." },
+      { name: "Spondylolysis & Spondylolisthesis", tags:["ck","clin"], desc:"Spondylolysis: pars interarticularis defect (stress fracture), young athletes. 'Scottie dog' collar on oblique X-ray. Spondylolisthesis: forward slippage, Meyerding grade I–IV. Bracing vs. spinal fusion." },
+    ]
+  },
+  {
+    icon: "✋",
+    title: "Upper Limb — Soft Tissue & Entrapment",
+    topics: [
+      { name: "Carpal Tunnel Syndrome (CTS)", tags:["ck","high","clin"], desc:"Median nerve compression at flexor retinaculum. Thenar wasting, first 3½ digits sensory loss, nocturnal paraesthesia. Tinel sign, Phalen test. Nerve conduction studies confirm. Splinting → steroid injection → surgical decompression." },
+      { name: "De Quervain Tenosynovitis", tags:["ck","clin"], desc:"Stenosing tenosynovitis of APL and EPB at first dorsal compartment. Radial styloid pain. Positive Finkelstein test. Steroid injection; surgical release if persistent." },
+      { name: "Dupuytren's Contracture", tags:["ck","clin"], desc:"Fibroproliferative disorder of palmar fascia. Ring and little finger flexion contracture. Males, Northern European, alcohol, diabetes. Needle fasciotomy or partial fasciectomy when MCP >30° or PIP contracted." },
+      { name: "Trigger Finger (Stenosing Tenosynovitis)", tags:["ck","clin"], desc:"A1 pulley thickening → tendon catches on flexion/extension. Diabetes, RA predispose. Steroid injection first-line; surgical release of A1 pulley." },
+      { name: "Lateral Epicondylitis (Tennis Elbow)", tags:["ck","clin"], desc:"Extensor carpi radialis brevis origin. Point tenderness lateral epicondyle. Cozen test. Eccentric strengthening exercises; steroid injection short-term relief; PRP; surgery rarely." },
+      { name: "Medial Epicondylitis (Golfer's Elbow)", tags:["ck","clin"], desc:"Pronator teres and FCR origin. Medial epicondyle tenderness. Ulnar nerve involvement (paresthesia ring/little finger) in 20%. Conservative management." },
+      { name: "Cubital Tunnel Syndrome", tags:["ck","clin"], desc:"Ulnar nerve compression at elbow (most common site after CTS). Intrinsic hand muscle wasting, ring/little finger parasthesia, clawing of ring/little fingers. Froment sign (flexor pollicis longus compensation for adductor pollicis weakness)." },
+      { name: "Rotator Cuff Tear & Impingement", tags:["ck","high","clin"], desc:"Supraspinatus most commonly torn. Impingement: painful arc 60–120°. Neer and Hawkins-Kennedy tests. Full-thickness tear: MRI gold standard. Conservative (physio, subacromial injection) vs. arthroscopic repair." },
+      { name: "Frozen Shoulder (Adhesive Capsulitis)", tags:["ck","clin"], desc:"Capsular fibrosis: painful (3–9 months) → frozen (9–15 months) → thawing (15–24 months). Global ROM restriction. Diabetics prone. Hydrodilatation, physiotherapy, MUA under anaesthesia." },
+      { name: "Biceps Tendon Rupture", tags:["ck","clin"], desc:"Proximal (long head): 'Popeye' deformity, minimal functional deficit. Distal (at radial tuberosity): significant loss of supination/flexion strength. Hook test for distal rupture. Distal: surgical repair; proximal: usually conservative." },
+    ]
+  },
+  {
+    icon: "🦵",
+    title: "Knee & Lower Limb",
+    topics: [
+      { name: "ACL Injury", tags:["ck","high","clin"], desc:"Non-contact pivot/deceleration mechanism. Haemarthrosis within hours. Lachman test (most sensitive), anterior drawer test, pivot shift test. MRI confirms. Reconstruction (BPTB or hamstring autograft) for active patients." },
+      { name: "PCL Injury", tags:["ck","clin"], desc:"Dashboard injury (posterior force on flexed knee). Posterior sag, posterior drawer test. Isolated PCL: often conservative. Combined instability: surgical." },
+      { name: "MCL & LCL Injuries", tags:["ck","clin"], desc:"MCL (valgus stress, most common ligamentous injury): usually conservative. LCL (varus stress, rare alone): posterolateral corner injury must be excluded. Graded I–III by severity." },
+      { name: "Meniscal Tears", tags:["ck","high","clin"], desc:"Medial meniscus more commonly torn. Medial joint-line tenderness, McMurray test, Thessaly test. Locking = bucket-handle tear. MRI gold standard. Repair vs. meniscectomy based on vascularity zone (red-red vs. white-white)." },
+      { name: "Patellofemoral Pain Syndrome", tags:["ck","clin"], desc:"Young active females. Peripatellar pain worse on stairs/squatting. Positive Clarke test. Q-angle assessment. VMO strengthening, patellar taping, orthotics." },
+      { name: "Patellar Dislocation", tags:["ck","clin"], desc:"Lateral dislocation on knee valgus + external tibial rotation. Medial patellar facet osteochondral fracture. MPFL reconstruction for recurrent dislocation. Trochlear dysplasia/TTTG distance assessment." },
+      { name: "Osteoarthritis of the Knee", tags:["ck","high","clin"], desc:"Medial compartment most common. Varus deformity. Kellgren-Lawrence grading. Conservative: analgesia, physio, intra-articular injections (steroids, hyaluronic acid, PRP). Surgical: HTO (younger) or TKR (older)." },
+      { name: "Baker's Cyst (Popliteal Cyst)", tags:["ck","clin"], desc:"Posterior knee swelling from synovial fluid dissection into gastrocnemius-semimembranosus bursa. Usually secondary to intra-articular pathology (OA, meniscal tear). Treat underlying cause." },
+      { name: "Achilles Tendon Rupture", tags:["ck","high","clin"], desc:"Middle-aged recreational athlete. Sudden pain, 'heard a snap'. Positive Simmonds (Thompson) test — squeeze calf, no foot plantarflexion. Conservative (VACOcast equinus) vs. surgical repair; comparable outcomes in trials." },
+      { name: "Plantar Fasciitis", tags:["ck","clin"], desc:"Heel pain worst in first steps of morning. Medial calcaneal tubercle tenderness. Stretching, orthotics, night splints. Steroid injection, ESWT, rarely plantar fascia release." },
+      { name: "Ankle Impingement Syndromes", tags:["clin"], desc:"Anterior: osteophytes at anterior tibiotalar joint (footballer's ankle). Posterior: os trigonum or Stieda process, dance. Arthroscopic debridement." },
+    ]
+  },
+  {
+    icon: "💊",
+    title: "Pharmacology — MSK & Rheumatology",
+    topics: [
+      { name: "NSAIDs — Mechanism & Side Effects", tags:["fa","high"], desc:"COX-1/COX-2 inhibition → ↓ prostaglandins. GI ulceration (↓ mucus/bicarb, COX-1). Renal: ↓ GFR, fluid retention. CV risk (COX-2 selective). Platelet dysfunction (irreversible with aspirin). Caution in asthma (aspirin-exacerbated)." },
+      { name: "Colchicine", tags:["fa","high"], desc:"Binds tubulin → inhibits microtubule polymerization → impairs neutrophil migration. Acute gout first-line. Side effects: GI (dose-limiting), myopathy. CYP3A4 substrate — interactions with macrolides/statins." },
+      { name: "Gout Chronic Management", tags:["fa","ck","high"], desc:"Allopurinol (XO inhibitor, start after acute resolves, target uric acid <360 µmol/L). Febuxostat (XO inhibitor, higher CV events in trial). Probenecid (uricosuric, avoid in renal failure/uric acid stones). Pegloticase (recombinant uricase, refractory)." },
+      { name: "Bisphosphonates", tags:["fa","high"], desc:"Pyrophosphate analogues → incorporated into bone → ingested by osteoclasts → inhibit farnesyl pyrophosphate synthase → osteoclast apoptosis. Side effects: oesophageal ulceration (alendronate), osteonecrosis of jaw, atypical subtrochanteric fractures (with prolonged use)." },
+      { name: "Denosumab", tags:["fa","ck","high"], desc:"Monoclonal antibody against RANKL → inhibits osteoclast differentiation. Used in osteoporosis (SC 6-monthly), GCT of bone, bone metastases. Risk: hypocalcaemia, osteonecrosis of jaw, rebound vertebral fractures on discontinuation." },
+      { name: "Teriparatide & Romosozumab", tags:["fa"], desc:"Teriparatide: recombinant PTH(1-34), anabolic, intermittent → osteoblast stimulation. Romosozumab: anti-sclerostin antibody (dual anabolic + anti-resorptive). Both second-line for high-fracture-risk osteoporosis." },
+      { name: "Conventional DMARDs", tags:["fa","ck","high"], desc:"Methotrexate (DHFR inhibitor, ↓ purines + ↓ inflammation, hepatotoxic, pulmonary toxicity, teratogenic — folate supplement). Leflunomide (DHODH inhibitor). Sulfasalazine. Hydroxychloroquine (retinal toxicity — annual eye check)." },
+      { name: "Biologic DMARDs — TNF Inhibitors", tags:["fa","ck","high"], desc:"Etanercept (TNF receptor fusion), Infliximab, Adalimumab (monoclonal antibodies). Indications: RA, AS, psoriatic arthritis. Screen TB/hepatitis B before starting. Risk: infection, reactivation TB, demyelination." },
+      { name: "Other Biologics — IL & JAK Inhibitors", tags:["fa","ck"], desc:"IL-6 inhibitor: Tocilizumab (RA, GCA). IL-17 inhibitors: Secukinumab (AS, psoriatic). IL-12/23: Ustekinumab. JAK inhibitors: Tofacitinib, Baricitinib (oral, RA — VTE and CV risk monitoring required)." },
+      { name: "Glucocorticoids — Musculoskeletal Use", tags:["fa","ck","high"], desc:"Intra-articular: methylprednisolone/triamcinolone. Systemic: PMR, GCA, myositis, vasculitis. Long-term side effects: osteoporosis (start bisphosphonate + Ca/Vit D), AVN, hyperglycaemia, Cushing, adrenal suppression." },
+      { name: "Muscle Relaxants", tags:["ck"], desc:"Baclofen (GABAb agonist, spasticity). Cyclobenzaprine (central, acute muscle spasm — anticholinergic). Dantrolene (peripheral, ryanodine receptor antagonist — malignant hyperthermia and spasticity). Diazepam (anxiety-related spasm)." },
+      { name: "Urate-Lowering Therapy — When to Start", tags:["fa","ck"], desc:"After second attack, or first attack with renal disease/tophi/serum UA >8 mg/dL. Do not start during acute attack. Target: serum UA <6 mg/dL (5 mg/dL if tophi). Prophylactic colchicine when starting ULT (6 months)." },
+    ]
+  },
+  {
+    icon: "🔩",
+    title: "Surgical Principles & Perioperative",
+    topics: [
+      { name: "Surgical Approaches to the Hip", tags:["clin","high"], desc:"Posterior (Moore): risk posterior capsule disruption → dislocation. Anterolateral (Watson-Jones): splits gluteus medius. Direct anterior (DAA): internervous, faster recovery, learning curve. Lateral (Hardinge): superior gluteal nerve at risk >5 cm proximal." },
+      { name: "Total Hip Replacement (THR)", tags:["clin","high"], desc:"Indications: end-stage OA/RA, AVN, failed DHS. Cemented vs. uncemented vs. hybrid. Bearing surfaces: MoP, CoC, MoM (abandoned — ARMD). Complications: dislocation (2%), infection, DVT/PE, limb length discrepancy, aseptic loosening (late)." },
+      { name: "Total Knee Replacement (TKR)", tags:["clin","high"], desc:"Indications: symptomatic end-stage knee OA. CR vs. PS (cruciate). Fixed vs. mobile bearing. Complications: infection (early/late), DVT/PE, stiffness, loosening, PFJ problems." },
+      { name: "VTE Prophylaxis in Orthopaedics", tags:["ck","high","clin"], desc:"LMWH or rivaroxaban post THR/TKR. Duration: 28–35 days post hip, 10–14 days post knee (UK NICE). Mechanical: anti-embolic stockings + intermittent pneumatic compression. Avoid in active bleeding." },
+      { name: "Principles of Internal Fixation", tags:["clin"], desc:"AO principles: anatomic reduction, stable fixation (absolute or relative stability), atraumatic technique, early mobilisation. Absolute stability (lag screw/plate): direct bone healing (no callus). Relative stability (intramedullary nail/bridging plate): indirect healing via callus." },
+      { name: "External Fixation", tags:["clin"], desc:"Indications: damage control orthopaedics, open fractures (temporary), infected non-unions, limb lengthening (Ilizarov). Complications: pin-site infection, re-fracture, joint stiffness." },
+      { name: "Open Fractures — Management Principles", tags:["ck","high","clin"], desc:"Gustilo-Anderson classification (I, II, IIIA, IIIB, IIIC). BOAST guidelines: IV antibiotics within 1 hour (co-amoxiclav), photography, saline-soaked dressings, theatre within 6 hours for Grade III. Wound debridement → definitive fixation → soft tissue coverage." },
+      { name: "Periprosthetic Joint Infection (PJI)", tags:["clin","high"], desc:"Early (<3 months): surgical debridement + implant retention (DAIR) + prolonged antibiotics. Late (>3 months): two-stage revision (spacer then re-implant). Criteria: raised CRP/ESR, synovial fluid cell count >3000 WBC, positive culture, sinogram." },
+      { name: "Non-Union & Delayed Union", tags:["clin"], desc:"Delayed union: no radiological healing by expected time. Non-union: >6 months without progression. Hypertrophic (adequate biology, insufficient stability) → fixation. Atrophic (poor biology) → fixation + bone graft. Ilizarov for infected/complex non-union." },
+      { name: "Bone Grafting & Substitutes", tags:["clin"], desc:"Autograft (iliac crest — gold standard: osteoconductive, osteoinductive, osteogenic). Allograft (bank bone — osteoconductive only). Bone substitutes: HA, TCP, calcium sulphate. DBM (demineralised bone matrix). BMP-2/7 (recombinant osteoinductive proteins)." },
+    ]
+  },
+  {
+    icon: "📋",
+    title: "Clinical Skills & Special Tests",
+    topics: [
+      { name: "GALS Screen (Gait, Arms, Legs, Spine)", tags:["ck","clin"], desc:"Screening locomotor examination. Gait (smooth, symmetrical), arms (hands, elbows, shoulders), legs (squat, knee bend, foot), spine (lateral flexion, forward flexion, extension)." },
+      { name: "Hip Examination Special Tests", tags:["clin","high"], desc:"FABER/Patrick test (hip flexion, abduction, external rotation → SI joint/hip pathology). FADIR (anterior impingement). Thomas test (fixed flexion deformity). Trendelenburg test (superior gluteal nerve/abductor weakness)." },
+      { name: "Knee Examination Special Tests", tags:["clin","high"], desc:"Lachman (ACL, most sensitive), anterior drawer (ACL), posterior drawer (PCL), McMurray (meniscus), Thessaly (meniscus), valgus/varus stress (collateral ligaments), Clarke test (PFJ), patellar apprehension." },
+      { name: "Shoulder Examination Special Tests", tags:["clin","high"], desc:"Neer and Hawkins-Kennedy (impingement), empty can/Jobe (supraspinatus), lift-off/belly-press (subscapularis), external rotation lag (infraspinatus/teres minor), apprehension/relocation (instability), Speed's/Yergason's (biceps)." },
+      { name: "Spine Examination", tags:["clin"], desc:"Schober test (lumbar flexion <5 cm increase = restricted). Straight leg raise (L4-S1 roots, positive <60°). Femoral nerve stretch test (L2-L3-L4). Waddell signs (non-organic low back pain)." },
+      { name: "Nerve Conduction Studies & EMG", tags:["ck","clin"], desc:"NCS: motor and sensory conduction velocity. Demyelination → ↓ conduction velocity. Axonal loss → ↓ amplitude. EMG: fibrillation potentials (denervation), positive sharp waves, polyphasic MUPs (reinnervation). Used in CTS, peripheral neuropathy, motor neurone disease." },
+      { name: "Imaging in Orthopaedics", tags:["clin","high"], desc:"X-ray: first-line (fractures, OA, metabolic). CT: complex fractures, surgical planning, tumour cortical detail. MRI: soft tissue (ligaments, cartilage, bone marrow oedema, infection, tumour). Bone scan (Tc-99m): infection, metastases, AVN (early cold phase). Ultrasound: tendons, bursae, guided injections." },
+    ]
+  },
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'msk_tracker_v2';
+
+function tagHTML(tags) {
+    const map = { fa:'FA Step 1', ck:'Step 2 CK', high:'High Yield', clin:'Clinical' };
+    const cls = { fa:'tag-fa', ck:'tag-ck', high:'tag-high', clin:'tag-clin' };
+    return tags.map(t=>`<span class="tag ${cls[t]}">${map[t]}</span>`).join('');
+}
+
+function buildDOM() {
+    const container = document.getElementById('tracker-content');
+    let idCounter = 0;
+    categories.forEach((cat, ci) => {
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.dataset.ci = ci;
+
+        const header = document.createElement('div');
+        header.className = 'cat-header';
+        header.innerHTML = `
+            <span class="cat-icon">${cat.icon}</span>
+            <div class="cat-title-wrap">
+                <div class="cat-num">Category ${String(ci+1).padStart(2,'0')}</div>
+                <div class="cat-title">${cat.title}</div>
+            </div>
+            <div class="cat-progress">
+                <span class="cat-count" id="cat-count-${ci}">0 / ${cat.topics.length}</span>
+                <div class="cat-mini-bar"><div class="cat-mini-fill" id="cat-fill-${ci}" style="width:0%"></div></div>
+            </div>
+            <span class="cat-chevron">▼</span>
+        `;
+
+        const list = document.createElement('ul');
+        list.className = 'topic-list';
+
+        cat.topics.forEach((topic, ti) => {
+            const id = `t-${ci}-${ti}`;
+            const li = document.createElement('li');
+            li.className = 'topic-item';
+            li.dataset.name = topic.name.toLowerCase();
+            li.dataset.desc = topic.desc.toLowerCase();
+            li.dataset.tags = topic.tags.join(' ');
+
+            li.innerHTML = `
+                <input type="checkbox" id="${id}" class="topic-checkbox" data-ci="${ci}">
+                <div class="topic-details">
+                    <label for="${id}" class="topic-name">${topic.name}</label>
+                    <div class="topic-tags">${tagHTML(topic.tags)}</div>
+                    <p class="topic-desc">${topic.desc}</p>
+                </div>
+            `;
+            list.appendChild(li);
+            idCounter++;
+        });
+
+        header.addEventListener('click', () => {
+            header.classList.toggle('collapsed');
+            list.classList.toggle('collapsed');
+        });
+
+        card.appendChild(header);
+        card.appendChild(list);
+        container.appendChild(card);
+    });
+    return idCounter;
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function storageOK() {
+    try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; } catch(e){ return false; }
+}
+const canStore = storageOK();
+if (!canStore) document.getElementById('warning-banner').style.display='block';
+
+function saveProgress() {
+    if (!canStore) return;
+    const data = {};
+    document.querySelectorAll('.topic-checkbox').forEach(cb => { data[cb.id] = cb.checked; });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e){}
+}
+
+function loadProgress() {
+    if (!canStore) return;
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        document.querySelectorAll('.topic-checkbox').forEach(cb => {
+            if (data[cb.id]) {
+                cb.checked = true;
+                cb.closest('.topic-item').classList.add('completed');
+            }
+        });
+    } catch(e) {}
+}
+
+// ── PROGRESS CALCS ────────────────────────────────────────────────────────────
+function updateProgress() {
+    const all = document.querySelectorAll('.topic-checkbox');
+    const done = document.querySelectorAll('.topic-checkbox:checked').length;
+    const total = all.length;
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    document.getElementById('progress-fill').style.width = pct+'%';
+    document.getElementById('stat-pct').textContent = pct+'%';
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-left').textContent = total - done;
+    document.getElementById('stat-total').textContent = total;
+
+    // Per-category mini bars
+    categories.forEach((cat, ci) => {
+        const catCBs = document.querySelectorAll(`.topic-checkbox[data-ci="${ci}"]`);
+        const catDone = document.querySelectorAll(`.topic-checkbox[data-ci="${ci}"]:checked`).length;
+        const catTotal = catCBs.length;
+        const catPct = catTotal ? Math.round(catDone/catTotal*100) : 0;
+        document.getElementById(`cat-count-${ci}`).textContent = `${catDone} / ${catTotal}`;
+        document.getElementById(`cat-fill-${ci}`).style.width = catPct+'%';
+    });
+}
+
+// ── SEARCH & FILTER ───────────────────────────────────────────────────────────
+let currentFilter = 'all';
+
+function applyFilters() {
+    const query = document.getElementById('search-box').value.toLowerCase().trim();
+    let anyVisible = false;
+
+    document.querySelectorAll('.category-card').forEach(card => {
+        const ci = parseInt(card.dataset.ci);
+        let catHasVisible = false;
+
+        card.querySelectorAll('.topic-item').forEach(item => {
+            const nameMatch = item.dataset.name.includes(query);
+            const descMatch = item.dataset.desc.includes(query);
+            const tagMatch  = item.dataset.tags.includes(query);
+            const searchOK  = !query || nameMatch || descMatch || tagMatch;
+
+            const cb = item.querySelector('.topic-checkbox');
+            const isDone = cb.checked;
+            const filterOK = currentFilter === 'all'
+                || (currentFilter === 'done' && isDone)
+                || (currentFilter === 'pending' && !isDone);
+
+            const show = searchOK && filterOK;
+            item.classList.toggle('hidden', !show);
+            if (show) catHasVisible = true;
+        });
+
+        card.style.display = catHasVisible ? '' : 'none';
+        if (catHasVisible) anyVisible = true;
+    });
+
+    document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    buildDOM();
+    loadProgress();
+    updateProgress();
+
+    // Checkbox events
+    document.getElementById('tracker-content').addEventListener('change', e => {
+        if (!e.target.classList.contains('topic-checkbox')) return;
+        e.target.closest('.topic-item').classList.toggle('completed', e.target.checked);
+        saveProgress();
+        updateProgress();
+        applyFilters();
+    });
+
+    // Search
+    document.getElementById('search-box').addEventListener('input', applyFilters);
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            applyFilters();
+        });
+    });
+
+    // Reset
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        if (!confirm('Reset all progress?')) return;
+        document.querySelectorAll('.topic-checkbox').forEach(cb => {
+            cb.checked = false;
+            cb.closest('.topic-item').classList.remove('completed');
+        });
+        if (canStore) { try { localStorage.removeItem(STORAGE_KEY); } catch(e){} }
+        updateProgress();
+        applyFilters();
+    });
+});
+</script>
+</body>
+</html>
